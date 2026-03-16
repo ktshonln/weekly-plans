@@ -1,48 +1,44 @@
-# 🚍 Katisha Online: Week 2 - Search Engine & Calendar Scheduling
+# 🚍 Katisha Online: Week 2 - Search Engine & Recurring Calendar Scheduling
 
-This week focuses on the "Marketplace" logic: how Operators schedule their fleet and how Passengers discover those trips using advanced filtering.
+This week focuses on the "Marketplace" logic: how Operators schedule their fleet (including recurring daily/weekly routes) and how Passengers discover those trips.
 
 ## 🎯 Objectives
 - Build a dynamic **Search & Filter** engine for passengers.
 - Implement a **Calendar-based Scheduling** interface for operators.
-- Enforce "Bus Availability" logic to prevent double-booking.
+- Develop the **Recurring Trip Engine** for automated schedule generation.
 
 ## 🛠 Tech Stack & Dependencies
-* **[FullCalendar.io](https://fullcalendar.io/docs/react) (or similar):** For the Operator's Week-view calendar.
-* **[date-fns](https://date-fns.org/):** For easy manipulation of dates and times in Node.js.
-* **[PostgreSQL Gist Indexes](https://www.postgresql.org/docs/current/gist.html):** To speed up searches on origin/destination strings and timestamps.
-
-## 🔑 Key Logic: The "Trip" Model
-A **Trip** is an instance of a **Route**. 
-- **Route:** (e.g., Kigali ➔ Rubavu).
-- **Trip:** (e.g., Kigali ➔ Rubavu, Bus #RAA123, Departure: 2026-03-20 08:00, Price: 5000 RWF).
+* **[FullCalendar.io](https://fullcalendar.io/):** For the Operator's Week-view calendar interface.
+* **[RRule.js](https://github.com/jakubroztocil/rrule):** The industry standard for handling recurrence rules (i.e., "Every 2nd Tuesday") in JavaScript.
+* **[node-cron](https://www.npmjs.com/package/node-cron):** To run a background job that generates trips from templates.
+* **[date-fns-tz](https://date-fns.org/docs/Time-Zones):** Essential for handling the Kigali (CAT) timezone accurately.
 
 ---
 
 ## 📅 Week 2 Deliverables
 
-### **1. Operator: Calendar Scheduling (Day 1-3)**
-- [ ] **Frontend:** Implement a **Week View** calendar using FullCalendar.
-- [ ] **Interaction:** Clicking a time slot opens a modal to select a Bus, Route, and Price.
-- [ ] **Backend:** Create `POST /trips` endpoint with validation logic to ensure the selected Bus isn't already assigned to another trip at that time.
+### **1. Operator: Calendar & Recurrence (Day 1-3)**
+- [ ] **Calendar UI:** Implement a **Week View** where clicking a slot opens a "New Trip" modal.
+- [ ] **Recurrence Modal:** Add a "Repeat" toggle. Options: *Daily, Weekly (choose days), Monthly.*
+- [ ] **Backend Schema:** Create a `TripTemplates` table to store these rules.
+- [ ] **The Generator:** Build a service that takes a `TripTemplate` and populates the `Trips` table for the next 14 days.
 
 ### **2. Passenger: Advanced Search API (Day 4-5)**
-- [ ] **Endpoint:** `GET /trips/search` with the following query params:
-    - `origin` & `destination` (Partial string matching).
-    - `date` (Specific day or range).
-    - `startTime` & `endTime` (Filter for morning/afternoon/night).
-    - `agencies` (Filter by specific bus companies).
-- [ ] **Backend:** Optimize query with PostgreSQL indexes on the `origin` and `destination` columns.
+- [ ] **Advanced Query:** Implement `GET /trips/search` with:
+    - **Fuzzy Search:** Destination/Origin names (using `ILIKE` or Postgres `pg_trgm`).
+    - **Temporal Filtering:** Date range and specific time-of-day slots.
+    - **Categorical Filtering:** Multi-select for Bus Companies (Agencies).
+- [ ] **Efficiency:** Create a composite index in Postgres on `(origin, destination, departure_time)`.
 
 ### **3. Passenger: Results UI (Day 6-7)**
-- [ ] **Frontend:** A "Search Results" page displaying available trips as cards.
-- [ ] **Details:** Show Company Name (e.g., Trinity Express), departure time, estimated arrival, and remaining seats.
-- [ ] **Filtering:** Sidebar for passengers to refine results by Price or Time without a full page reload.
+- [ ] **Frontend Search:** Build the search bar and filter sidebar.
+- [ ] **Real-time Results:** Use a "Live Search" feel where results update as the user tweaks filters.
+- [ ] **Availability Logic:** Ensure search results only show trips where `available_seats > 0`.
 
 ---
 
 ## 📂 Useful Resources for Week 2
-* **[FullCalendar React/Vue Component](https://fullcalendar.io/docs/initialize-es6):** Guide for setting up the week-view grid.
-* **[Postgres ILIKE vs. Full Text Search](https://www.crunchydata.com/blog/postgres-full-text-search-vs-ilike):** Which one to use for your destination names.
-* **[Handling Timezones in Node.js](https://moment.github.io/luxon/#/):** Crucial for ensuring "8:00 AM" in Kigali is recorded correctly in the DB.
+* **[Postgres Trigram Indexes for Search](https://about.gitlab.com/blog/2016/03/11/trigram-indexes-in-postgresql/):** How to make searching for "Kig" vs "Kigali" lightning fast.
+* **[RRule Demo](https://jakubroztocil.github.io/rrule/):** Use this to test how recurrence strings look before implementing them in your code.
+* **[Handling Recurring Events in SQL](https://stackoverflow.com/questions/512504/database-design-for-recurring-events):** A deep dive into why storing "Templates" is better than storing infinite future dates.
 * **[Another fronted resource](https://github.com/rasel-mahmud-dev/google-calendar-clone)
