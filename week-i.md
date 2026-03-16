@@ -55,6 +55,7 @@ We are implementing a **Hierarchical RBAC**. Instead of assigning every single p
 - [ ] Implement `POST /auth/register` (Passenger/Operator signup logic).
 - [ ] Build the **Permission Expander** utility to handle Read/Write inheritance.
 - [ ] Create a `checkAbility` middleware using CASL to protect sensitive routes.
+- [ ] Create default system objects like users, buses, ...
 
 ### **3. Frontend & UI Gate (Day 6-7)**
 - [ ] Build Login/Signup forms for Passengers.
